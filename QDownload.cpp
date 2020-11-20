@@ -1,19 +1,17 @@
 ﻿#include "QDownload.h"
 
-QDownload::QDownload(QObject *parent)
+
+QDownload::QDownload(const QUrl &url, const QString &file, int kind, QHash<QString, QVariant> metadata, QObject *parent)
     : QObject(parent),
-      m_manager(new QNetworkAccessManager(this))
+      m_manager(new QNetworkAccessManager(this)),
+      m_error("No error"),
+      m_targetUrl(url),
+      m_kind(kind),
+      m_metadata(metadata)
 {
     connect(m_manager, &QNetworkAccessManager::finished,
             this, &QDownload::finishDownload);
-}
-
-QDownload::QDownload(const QUrl &url, const QString &file, int kind, QObject *parent)
-    : QDownload(parent)
-{
-    setTargetUrl(url);
     setTargetFile(file);
-    setKind(kind);
 }
 
 
@@ -29,6 +27,15 @@ int QDownload::kind() const {
     return m_kind;
 }
 
+QVariant QDownload::metadata(const QString &key) const {
+    return m_metadata.value(key);
+}
+
+QVariant QDownload::metadata(const QString &key, const QVariant &defaultValue) const {
+    return m_metadata.value(key, defaultValue);
+}
+
+
 QString QDownload::error() const {
     return m_error;
 }
@@ -36,6 +43,7 @@ QString QDownload::error() const {
 bool QDownload::success() const {
     return (m_error == "No error");
 }
+
 
 void QDownload::setTargetUrl(const QUrl &url) {
     m_targetUrl = url;
@@ -47,6 +55,10 @@ void QDownload::setTargetFile(const QString &file) {
 
 void QDownload::setKind(const int kind) {
     m_kind = kind;
+}
+
+void QDownload::setMetadata(const QHash<QString, QVariant> metadata) {
+    m_metadata = metadata;
 }
 
 

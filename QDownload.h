@@ -11,13 +11,14 @@ class QDownload : public QObject
     Q_OBJECT
 
 public:
-    explicit QDownload(QObject *parent = nullptr);
-    explicit QDownload(const QUrl &url, const QString &file, int kind = 0, QObject *parent = nullptr);
+    explicit QDownload(const QUrl &url, const QString &file, int kind = 0, QHash<QString, QVariant> metadata = QHash<QString, QVariant>(), QObject *parent = nullptr);
 
 
     QUrl targetUrl() const;
     QString targetFile() const;
     int kind() const;
+    QVariant metadata(const QString &key) const;
+    QVariant metadata(const QString &key, const QVariant &defaultValue) const;
 
     QString error() const;
     bool success() const;
@@ -25,6 +26,7 @@ public:
     void setTargetUrl(const QUrl &url);
     void setTargetFile(const QString &file);
     void setKind(const int kind);
+    void setMetadata(const QHash<QString,QVariant> metadata);
 
 
     void get() const;
@@ -46,6 +48,8 @@ private:
     QFile m_targetFile;
     QUrl m_targetUrl;
     int m_kind;
+    QHash<QString,QVariant> m_metadata;
+
 };
 
 #endif // QDOWNLOAD_H
