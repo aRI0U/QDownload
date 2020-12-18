@@ -63,7 +63,9 @@ void QDownload::setMetadata(const QHash<QString, QVariant> metadata) {
 
 
 void QDownload::get() const {
-    QNetworkReply *reply = m_manager->get(QNetworkRequest(m_targetUrl));
+    QNetworkRequest request(m_targetUrl);
+    request.setHeader(QNetworkRequest::UserAgentHeader, "Mozilla Firefox");
+    QNetworkReply *reply = m_manager->get(request);
 
     connect(reply, &QNetworkReply::downloadProgress,
             this, &QDownload::sendDownloadProgress);
@@ -77,7 +79,8 @@ void QDownload::sendDownloadProgress(qint64 bytesReceived, qint64 bytesTotal) {
 void QDownload::finishDownload(QNetworkReply *reply) {
     // propagate errors if any
     if (reply->error() != QNetworkReply::NoError)
-        m_error = reply->errorString();
+        m_error = QString::number(reply->error());
+
     else if (!m_targetFile.open(QIODevice::WriteOnly))
         m_error = m_targetFile.errorString();
 
