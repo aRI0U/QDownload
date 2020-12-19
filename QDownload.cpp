@@ -79,15 +79,27 @@ void QDownload::sendDownloadProgress(qint64 bytesReceived, qint64 bytesTotal) {
 void QDownload::finishDownload(QNetworkReply *reply) {
     // propagate errors if any
     if (reply->error() != QNetworkReply::NoError)
-        m_error = QString::number(reply->error());
+        m_error = tr("Connection error: ") + reply->errorString();
+
+//    else if (!m_targetFile.setPermissions(QFileDevice::ReadOwner
+//                                     | QFileDevice::WriteOwner
+//                                     | QFileDevice::ReadUser
+//                                     | QFileDevice::WriteUser
+//                                     | QFileDevice::ReadGroup
+//                                     | QFileDevice::WriteGroup
+//                                     | QFileDevice::ReadOther
+//                                     | QFileDevice::WriteOther))
+//        m_error = m_targetFile.errorString();
 
     else if (!m_targetFile.open(QIODevice::WriteOnly))
-        m_error = m_targetFile.errorString();
+        m_error = tr("I/O error: ") + m_targetFile.errorString();
 
     else {
         m_error = "No error";
         writeDownloadedData(reply->readAll());
     }
+
+    qDebug() << targetFile() << m_error;
 
     reply->deleteLater();
 
