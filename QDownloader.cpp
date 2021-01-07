@@ -46,6 +46,7 @@ void QDownloader::sendDownloadProgress(qint64 bytesReceived, qint64 bytesTotal, 
 
 void QDownloader::terminateDownload(QDownload *download) {
     emit downloadTerminated(download);
+    download->deleteLater();
     if (--m_numberRunningTasks < maxRunningTasks && !m_queue.isEmpty())
         launchDownload(m_queue.dequeue());
 }
