@@ -45,20 +45,8 @@ bool QDownload::success() const {
 }
 
 
-void QDownload::setTargetUrl(const QUrl &url) {
-    m_targetUrl = url;
-}
-
 void QDownload::setTargetFile(const QString &file) {
     m_targetFile.setFileName(file);
-}
-
-void QDownload::setKind(const int kind) {
-    m_kind = kind;
-}
-
-void QDownload::setMetadata(const QHash<QString, QVariant> metadata) {
-    m_metadata = metadata;
 }
 
 
@@ -80,16 +68,6 @@ void QDownload::finishDownload(QNetworkReply *reply) {
     // propagate errors if any
     if (reply->error() != QNetworkReply::NoError)
         m_error = tr("Connection error: ") + reply->errorString();
-
-//    else if (!m_targetFile.setPermissions(QFileDevice::ReadOwner
-//                                     | QFileDevice::WriteOwner
-//                                     | QFileDevice::ReadUser
-//                                     | QFileDevice::WriteUser
-//                                     | QFileDevice::ReadGroup
-//                                     | QFileDevice::WriteGroup
-//                                     | QFileDevice::ReadOther
-//                                     | QFileDevice::WriteOther))
-//        m_error = m_targetFile.errorString();
 
     else if (!m_targetFile.open(QIODevice::WriteOnly))
         m_error = tr("I/O error: ") + m_targetFile.errorString();

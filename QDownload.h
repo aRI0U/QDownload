@@ -23,11 +23,7 @@ public:
     QString error() const;
     bool success() const;
 
-    void setTargetUrl(const QUrl &url);
     void setTargetFile(const QString &file);
-    void setKind(const int kind);
-    void setMetadata(const QHash<QString,QVariant> metadata);
-
 
     void get() const;
 

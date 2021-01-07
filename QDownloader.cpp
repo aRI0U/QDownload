@@ -19,7 +19,7 @@ void QDownloader::setDefaultPolicy(QOverwritePolicy overwrite) {
 
 
 void QDownloader::download(const QUrl url, const QString file, int kind, QHash<QString, QVariant> metadata, QOverwritePolicy overwrite) {
-    QDownload *dl = newTask(url, file, kind, metadata);
+    QDownload *dl = new QDownload(url, file, kind, metadata, this);
 
     if (overwrite == QOverwritePolicy::Overwrite
             || (overwrite == QOverwritePolicy::Default && defaultPolicy() == QOverwritePolicy::Overwrite)
@@ -29,10 +29,10 @@ void QDownloader::download(const QUrl url, const QString file, int kind, QHash<Q
         connect(dl, &QDownload::finished,
                 this, &QDownloader::terminateDownload);
 
-        dl->get();
+        newTask(dl);
     }
     else
-        terminateDownload(dl);
+        emit downloadTerminated(dl);
 }
 
 void QDownloader::download(const QUrl url, const QFile &file, int kind, QHash<QString, QVariant> metadata, QOverwritePolicy overwrite) {
@@ -45,13 +45,20 @@ void QDownloader::sendDownloadProgress(qint64 bytesReceived, qint64 bytesTotal, 
 }
 
 void QDownloader::terminateDownload(QDownload *download) {
-    m_tasksList.removeOne(download);
     emit downloadTerminated(download);
+    if (--m_numberRunningTasks < maxRunningTasks && !m_queue.isEmpty())
+        launchDownload(m_queue.dequeue());
 }
 
 
-QDownload *QDownloader::newTask(const QUrl &url, const QString &file, int kind, QHash<QString, QVariant> metadata) {
-    QDownload *dl = new QDownload(url, file, kind, metadata, this);
-    m_tasksList.append(dl);
-    return dl;
+void QDownloader::launchDownload(const QDownload *download) {
+    download->get();
+    ++m_numberRunningTasks;
+}
+
+void QDownloader::newTask(QDownload *download) {
+    if (m_numberRunningTasks + 1 < maxRunningTasks)
+        launchDownload(download);
+    else
+        m_queue.enqueue(download);
 }

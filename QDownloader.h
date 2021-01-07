@@ -3,6 +3,7 @@
 
 #include <QFile>
 #include <QFileInfo>
+#include <QQueue>
 #include <QUrl>
 
 #include "QDownload.h"
@@ -17,6 +18,7 @@ class QDownloader : public QObject
 {
     Q_OBJECT
     typedef QList<QDownload *> QDownloadList;
+    typedef QQueue<QDownload *> QDownloadQueue;
 
 public:
     explicit QDownloader(QObject *parent = nullptr);
@@ -46,10 +48,14 @@ private slots:
     void terminateDownload(QDownload *download);
 
 private:
-    QDownload *newTask(const QUrl &url, const QString &file, int kind, QHash<QString, QVariant> metadata);
+    void launchDownload(const QDownload *download);
+    void newTask(QDownload *download);
 
-    QDownloadList m_tasksList;
+    QDownloadQueue m_queue;
     QOverwritePolicy m_defaultPolicy = QOverwritePolicy::Overwrite;
+
+    uint m_numberRunningTasks = 0;
+    const uint maxRunningTasks = 100;
 };
 
 #endif // QDOWNLOADER_H
