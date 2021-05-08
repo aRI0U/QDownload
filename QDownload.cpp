@@ -52,7 +52,10 @@ void QDownload::setTargetFile(const QString &file) {
 
 void QDownload::get() const {
     QNetworkRequest request(m_targetUrl);
-    request.setHeader(QNetworkRequest::UserAgentHeader, "Mozilla Firefox");
+
+    // HEADERS: TODO: make them general
+    request.setRawHeader(QByteArray("User-Agent"), QByteArray("Mozilla/5.0 (Windows NT 6.0) AppleWebKit/537.11 (KHTML, like Gecko) Chrome/23.0.1271.97 Safari/537.11"));
+    request.setRawHeader(QByteArray("Referer"), QByteArray("https://scantrad.net/"));
     QNetworkReply *reply = m_manager->get(request);
 
     connect(reply, &QNetworkReply::downloadProgress,
@@ -76,8 +79,6 @@ void QDownload::finishDownload(QNetworkReply *reply) {
         m_error = "No error";
         writeDownloadedData(reply->readAll());
     }
-
-    qDebug() << targetFile() << m_error;
 
     reply->deleteLater();
 
